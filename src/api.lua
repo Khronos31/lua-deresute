@@ -18,68 +18,95 @@ local Api = {}
 local api = {}
 
 function Api:call(path, args)
-  math.randomseed(os.time())
-  local vid_iv = util.str_random(16)
-  args["timezone"] = "09:00:00"
-  args["viewer_id"] = vid_iv..base64.encode(util.encrypt_cbc(self.viewer_id, VIEWER_ID_KEY, vid_iv))
-  local plain = base64.encode(mp.pack(args))
-  local key = util.str_random(32)
-  local msg_iv = util.get_iv(self.udid)
-  local body = util.create_body(args, key, msg_iv)
-  local sid = self.sid or (self.viewer_id..self.udid)
-  local req_headers = {
-    --["Host"] = "apis.game.starlight-stage.jp",
-    ["APP-VER"] = "9.0.0",
-    ["IP-ADDRESS"] = "127.0.0.1",
-    ["X-Unity-Version"] = "2020.3.8f1",
-    ["DEVICE"] = "1",
-    ["DEVICE-ID"] = digest.digest("md5", "This is a really iPhone ^^"),
-    ["GRAPHICS-DEVICE-NAME"] = "Apple A11 GPU",
-    ["PARAM"] = digest.digest("sha1", self.udid..self.viewer_id..path..plain),
-    ["PLATFORM-OS-VERSION"] = "iOS 14.3",
-    ["UDID"] = util.lolfuscate(self.udid),
-    ["CARRIER"] = "docomo",
-    ["SID"] = digest.digest("md5", sid..SID_KEY),
-    ["RES-VER"] = self.res_ver,
-    --["IDFA"] = "00000000-0000-0000-0000-000000000000",
-    --["UV"] = "0123456789abcdef0123456789abcdef01234567", --何かのsha1?
-    --["KEYCHAIN"] = self.viewer_id,
-    ["PROCESSOR-TYPE"] = "arm64",
-    ["USER-ID"] = util.lolfuscate(tostring(self.user)),
-    ["DEVICE-NAME"] = "iPhone10,1",
-    --["Connection"] = "keep-alive",
-    ["Content-Type"] = "application/octet-stream",
-    ["Content-Length"] = #body,
-    --["Accept"] = "*/*",
-    --["Accept-Encoding"] = "gzip, deflate, br",
-    ["User-Agent"] = "BNEI0242/317 CFNetwork/1209 Darwin/20.2.0",
-  }
-  local res = {}
-  local _, code, res_headers, status = https.request {
-    url = self.BASE..path,
-    sink = ltn12.sink.table(res),
-    method = "POST",
-    source = ltn12.source.string(body),
-    headers = req_headers,
-  }
-  if code ~= 200 then
-    error("status code: "..status)
-  end
-  local msg = util.unpack_body(table.concat(res), msg_iv)
-  self.sid = msg["data_headers"]["sid"]
-  return msg
+   math.randomseed(os.time())
+   local vid_iv = util.str_random(16)
+   args.timezone = "09:00:00"
+   args.viewer_id = vid_iv..base64.encode(util.encrypt_cbc(self.viewer_id, VIEWER_ID_KEY, vid_iv))
+   local plain = base64.encode(mp.pack(args))
+   local key = util.str_random(32)
+   local msg_iv = util.get_iv(self.udid)
+   local body = util.create_body(args, key, msg_iv)
+   local sid = self.sid or (self.viewer_id..self.udid)
+   local req_headers = {
+      --["Host"] = "apis.game.starlight-stage.jp",
+      ["APP-VER"] = "9.9.9",
+      ["IP-ADDRESS"] = "127.0.0.1",
+      ["X-Unity-Version"] = "2020.3.8f1",
+      ["DEVICE"] = "1",
+      ["DEVICE-ID"] = digest.digest("md5", "This is a really iPhone ^^"),
+      ["GRAPHICS-DEVICE-NAME"] = "Apple A11 GPU",
+      ["PARAM"] = digest.digest("sha1", self.udid..self.viewer_id..path..plain),
+      ["PLATFORM-OS-VERSION"] = "iOS 14.3",
+      ["UDID"] = util.lolfuscate(self.udid),
+      ["CARRIER"] = "docomo",
+      ["SID"] = digest.digest("md5", sid..SID_KEY),
+      ["RES-VER"] = self.res_ver,
+      --["IDFA"] = "00000000-0000-0000-0000-000000000000",
+      --["UV"] = "0123456789abcdef0123456789abcdef01234567", --何かのsha1?
+      --["KEYCHAIN"] = self.viewer_id,
+      ["PROCESSOR-TYPE"] = "arm64",
+      ["USER-ID"] = util.lolfuscate(tostring(self.user_id)),
+      ["DEVICE-NAME"] = "iPhone10,1",
+      --["Connection"] = "keep-alive",
+      ["Content-Type"] = "application/octet-stream",
+      ["Content-Length"] = #body,
+      --["Accept"] = "*/*",
+      --["Accept-Encoding"] = "gzip, deflate, br",
+      ["User-Agent"] = "BNEI0242/317 CFNetwork/1209 Darwin/20.2.0",
+   }
+   local res = {}
+   local _, code, res_headers, status = https.request {
+      url = self.BASE..path,
+      sink = ltn12.sink.table(res),
+      method = "POST",
+      source = ltn12.source.string(body),
+      headers = req_headers,
+   }
+   if code ~= 200 then
+      error("status code: "..status)
+   end
+   self.response = util.unpack_body(table.concat(res), msg_iv)
+   if self.response.data_headers.sid ~= "" then
+      self.sid = self.response.data_headers.sid
+   end
+   return self
 end
 
-function api.new(user, viewer_id, udid, res_ver)
-  local self = {}
-  setmetatable(self, { __index = Api })
-  self.BASE = "https://apis.game.starlight-stage.jp"
-  self.user = user
-  self.viewer_id = viewer_id
-  self.udid = udid
-  self.sid = nil
-  self.res_ver = res_ver or "10092700"
-  return self
+function Api:login()
+   local args = {
+      campaign_data = "",
+      campaign_data = 12345,
+      campaign_sign = digest.digest("md5", "All your APIs are belong to us 3"),
+      app_type = 0,
+      cl_log_params = {udid = "", userId = "", viewerId = 0},
+      error_text = "",
+   }
+   self:call("/load/check", args)
+   if self.response.data_headers.result_code == 214 then
+      self.res_ver = self.response.data_headers.required_res_ver
+      self:call("/load/check", args)
+   end
+   self:call("/load/index", args)
+   return self
+end
+
+function api.new(arg1, viewer_id, udid)
+   local user_id
+   if type(arg1) == "table" then
+      user_id = arg1.user_id
+      viewer_id = arg1.viewer_id
+      udid = arg1.udid
+   end
+   local self = {}
+   setmetatable(self, { __index = Api })
+   self.BASE = "https://apis.game.starlight-stage.jp"
+   self.user_id = user_id
+   self.viewer_id = viewer_id
+   self.udid = udid
+   self.sid = nil
+   self.res_ver = "10110900"
+   self.response = nil
+   return self
 end
 
 return api
