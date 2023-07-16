@@ -1,14 +1,8 @@
 package = "lua-deresute"
 version = "0.0.2-1"
---[[
 source = {
    url = "git+https://github.com/Khronos31/lua-deresute",
    tag = "v0.0.2"
-}
-]]
-source = {
-   url = "git+file:///var/mobile/src/Khronos31/lua-deresute",
-   branch = "0.0.2"
 }
 description = {
    homepage = "https://github.com/Khronos31/lua-deresute",
