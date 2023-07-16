@@ -3,14 +3,15 @@
 local string = require("string")
 local util = require("deresute.util")
 
-local udid = util.unlolfuscate(arg[1])
-local user = util.unpack_body(arg[2], util.get_iv(udid)).data_headers
-local file = io.open("account.lua", "w")
+local user_id = util.unlolfuscate(arg[1])
+local viewer_id = arg[2]
+local udid = util.unlolfuscate(arg[3])
+local file = io.open((arg[4] or "account")..".lua", "w")
 file:write(string.format([[
 return {
    ["user_id"] = "%s",
    ["viewer_id"] = "%s",
    ["udid"] = "%s",
 }
-]], user.user_id, user.viewer_id, udid))
+]], user_id, viewer_id, udid))
 file:close()

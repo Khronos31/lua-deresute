@@ -29,7 +29,7 @@ function Api:call(path, args)
   local sid = self.sid or (self.viewer_id..self.udid)
   local req_headers = {
     --["Host"] = "apis.game.starlight-stage.jp",
-    ["APP-VER"] = "9.0.0",
+    ["APP-VER"] = "9.9.9",
     ["IP-ADDRESS"] = "127.0.0.1",
     ["X-Unity-Version"] = "2020.3.8f1",
     ["DEVICE"] = "1",
@@ -45,7 +45,7 @@ function Api:call(path, args)
     --["UV"] = "0123456789abcdef0123456789abcdef01234567", --何かのsha1?
     --["KEYCHAIN"] = self.viewer_id,
     ["PROCESSOR-TYPE"] = "arm64",
-    ["USER-ID"] = util.lolfuscate(tostring(self.user)),
+    ["USER-ID"] = util.lolfuscate(tostring(self.user_id)),
     ["DEVICE-NAME"] = "iPhone10,1",
     --["Connection"] = "keep-alive",
     ["Content-Type"] = "application/octet-stream",
@@ -70,15 +70,39 @@ function Api:call(path, args)
   return msg
 end
 
-function api.new(user, viewer_id, udid, res_ver)
+function Api:login()
+  local res
+  local args = {
+    ["campaign_data"] = ""
+    ["campaign_data"] = 12345
+    ["campaign_sign"] = digest.digest("md5", "All your APIs are belong to us 3")
+    ["app_type"] = 0
+    ["cl_log_params"] = {["udid"] = "", ["userId"] = "", ["viewerId"] = 0}
+    ["error_text"] = ""
+  }
+  res = self:call("/load/title", args)
+  print(json.encode(res))
+  res = self:call("/load/chcek", args)
+  print(json.encode(res))
+  res = self:call("/load/index", args)
+  print(json.encode(res))
+end
+
+function api.new(arg1, viewer_id, udid)
+  local user_id
+  if type(arg1) == "table" then
+    user_id = arg1.user_id
+    viewer_id = arg1.viewer_id
+    udid = arg1.udid
+  end
   local self = {}
   setmetatable(self, { __index = Api })
   self.BASE = "https://apis.game.starlight-stage.jp"
-  self.user = user
+  self.user_id = user_id
   self.viewer_id = viewer_id
   self.udid = udid
   self.sid = nil
-  self.res_ver = res_ver or "10092700"
+  self.res_ver = "10110900"
   return self
 end
 
