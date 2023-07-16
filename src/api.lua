@@ -20,8 +20,8 @@ local api = {}
 function Api:call(path, args)
   math.randomseed(os.time())
   local vid_iv = util.str_random(16)
-  args["timezone"] = "09:00:00"
-  args["viewer_id"] = vid_iv..base64.encode(util.encrypt_cbc(self.viewer_id, VIEWER_ID_KEY, vid_iv))
+  args.timezone = "09:00:00"
+  args.viewer_id = vid_iv..base64.encode(util.encrypt_cbc(self.viewer_id, VIEWER_ID_KEY, vid_iv))
   local plain = base64.encode(mp.pack(args))
   local key = util.str_random(32)
   local msg_iv = util.get_iv(self.udid)
