@@ -83,6 +83,10 @@ function Api:login()
   res = self:call("/load/title", args)
   print(json.encode(res))
   res = self:call("/load/check", args)
+  if res.data_headers.result_code == 214 then
+    self.res_ver = res.data_headers.required_res_ver
+    self:call("/load/check", args)
+  end
   print(json.encode(res))
   res = self:call("/load/index", args)
   print(json.encode(res))
