@@ -92,7 +92,9 @@ function Api:login()
   end
   print(json.encode(res))
   res = self:call("/load/index", args)
-  print(json.encode(res))
+  for k, v in pairs(res) do
+    print(k, v)
+  end
 end
 
 function api.new(arg1, viewer_id, udid)
