@@ -66,8 +66,8 @@ function Api:call(path, args)
     error("status code: "..status)
   end
   self.response = util.unpack_body(table.concat(res), msg_iv)
-  if msg.data_headers.sid ~= "" then
-    self.sid = msg.data_headers.sid
+  if self.response.data_headers.sid ~= "" then
+    self.sid = self.response.data_headers.sid
   end
   return self
 end
