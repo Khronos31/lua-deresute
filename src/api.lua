@@ -87,6 +87,7 @@ function Api:login()
     self:call("/load/check", args)
   end
   self:call("/load/index", args)
+  return self
 end
 
 function api.new(arg1, viewer_id, udid)
