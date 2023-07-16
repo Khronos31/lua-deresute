@@ -92,7 +92,7 @@ function Api:login()
   end
   print(json.encode(res))
   res = self:call("/load/index", args)
-  for k, v in pairs(res) do
+  for k, v in pairs(res.data_headers) do
     print(k, v)
   end
 end
