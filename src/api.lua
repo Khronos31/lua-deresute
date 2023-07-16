@@ -80,8 +80,8 @@ function Api:login()
     cl_log_params = {udid = "", userId = "", viewerId = 0},
     error_text = "",
   }
-  res = self:call("/load/title", args)
-  print(json.encode(res))
+  --res = self:call("/load/title", args)
+  --print(json.encode(res))
   res = self:call("/load/check", args)
   if res.data_headers.result_code == 214 then
     self.res_ver = res.data_headers.required_res_ver
