@@ -73,12 +73,12 @@ end
 function Api:login()
   local res
   local args = {
-    ["campaign_data"] = ""
-    ["campaign_data"] = 12345
-    ["campaign_sign"] = digest.digest("md5", "All your APIs are belong to us 3")
-    ["app_type"] = 0
-    ["cl_log_params"] = {["udid"] = "", ["userId"] = "", ["viewerId"] = 0}
-    ["error_text"] = ""
+    campaign_data = "",
+    campaign_data = 12345,
+    campaign_sign = digest.digest("md5", "All your APIs are belong to us 3"),
+    app_type = 0,
+    cl_log_params = {udid = "", userId = "", viewerId = 0},
+    error_text = "",
   }
   res = self:call("/load/title", args)
   print(json.encode(res))
