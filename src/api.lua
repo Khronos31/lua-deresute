@@ -65,15 +65,14 @@ function Api:call(path, args)
   if code ~= 200 then
     error("status code: "..status)
   end
-  local msg = util.unpack_body(table.concat(res), msg_iv)
-  if msg["data_headers"]["sid"] ~= "" then
-    self.sid = msg["data_headers"]["sid"]
+  self.response = util.unpack_body(table.concat(res), msg_iv)
+  if msg.data_headers.sid ~= "" then
+    self.sid = msg.data_headers.sid
   end
-  return msg
+  return self
 end
 
 function Api:login()
-  local res
   local args = {
     campaign_data = "",
     campaign_data = 12345,
@@ -82,19 +81,12 @@ function Api:login()
     cl_log_params = {udid = "", userId = "", viewerId = 0},
     error_text = "",
   }
-  --res = self:call("/load/title", args)
-  --print(json.encode(res))
-  res = self:call("/load/check", args)
-  print(json.encode(res))
-  if res.data_headers.result_code == 214 then
-    self.res_ver = res.data_headers.required_res_ver
-    res = self:call("/load/check", args)
+  self:call("/load/check", args)
+  if self.response.data_headers.result_code == 214 then
+    self.res_ver = self.response.data_headers.required_res_ver
+    self:call("/load/check", args)
   end
-  print(json.encode(res))
-  res = self:call("/load/index", args)
-  for k, v in pairs(res.data) do
-    print(k, v)
-  end
+  self:call("/load/index", args)
 end
 
 function api.new(arg1, viewer_id, udid)
@@ -112,6 +104,7 @@ function api.new(arg1, viewer_id, udid)
   self.udid = udid
   self.sid = nil
   self.res_ver = "10110900"
+  self.response = nil
   return self
 end
 
