@@ -82,7 +82,7 @@ function Api:login()
   }
   res = self:call("/load/title", args)
   print(json.encode(res))
-  res = self:call("/load/chcek", args)
+  res = self:call("/load/check", args)
   print(json.encode(res))
   res = self:call("/load/index", args)
   print(json.encode(res))
